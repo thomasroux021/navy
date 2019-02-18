@@ -17,8 +17,12 @@
 #include <fcntl.h>
 #include "../src/lib/my/lib.h"
 
-int parser_file(char *file);
+char *parser_file(char *file);
+int len_boat(char **map);
+char **create_map(void);
 
 int print_help(int ac, char **av);
+void print_map(char **map);
 
+char **fill_map(char **map, char *str);
 #endif

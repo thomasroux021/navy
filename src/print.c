@@ -18,3 +18,14 @@ int print_help(int ac, char **av)
     }
     return (-1);
 }
+
+void print_map(char **map)
+{
+    my_putstr("  ABCDEFGH\n");
+    for (int i = 0; map[i] != NULL; i += 1) {
+        my_put_nbr(i + 1);
+        my_putchar(' ');
+        my_putstr(map[i]);
+        my_putchar('\n');
+    }
+}

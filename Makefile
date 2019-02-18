@@ -15,7 +15,8 @@ CFLAGS	=	-I./include -I$(LIB_PATH)
 
 SRCS	=	./src/main.c \
 		./src/parser.c \
-		./src/print.c
+		./src/print.c \
+		./src/map.c
 
 LIB_PATH=	src/lib/my/
 
