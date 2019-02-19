@@ -19,13 +19,18 @@ int print_help(int ac, char **av)
     return (-1);
 }
 
-void print_map(char **map)
+void print_map(char **map, char *str)
 {
-    my_putstr("  ABCDEFGH\n");
+    my_putstr(str);
+    my_putstr(" |A B C D E F G H\n-+---------------\n");
     for (int i = 0; map[i] != NULL; i += 1) {
         my_put_nbr(i + 1);
-        my_putchar(' ');
-        my_putstr(map[i]);
+        my_putchar('|');
+        for (int j = 0; map[i][j]; j += 1) {
+            my_putchar(map[i][j]);
+            (j < 7) ? my_putchar(' ') : 0;
+        }
         my_putchar('\n');
     }
+    my_putchar('\n');
 }

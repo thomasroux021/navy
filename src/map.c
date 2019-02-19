@@ -87,6 +87,5 @@ char **fill_map(char **map, char *str)
     }
     if (len_boat(map) == -1)
         return (NULL);
-    print_map(map);
     return (map);
 }
