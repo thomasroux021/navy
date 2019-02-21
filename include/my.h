@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "../src/lib/my/lib.h"
@@ -22,7 +23,15 @@
 #define READ_SIZE 1
 #endif
 
-int t_pid;
+typedef struct s_glob
+{
+    int t_pid;
+    int res;
+    int col;
+    int line;
+} t_glob;
+
+t_glob *glob;
 
 char *parser_file(char *file);
 int len_boat(char **map);

@@ -9,11 +9,20 @@
 
 void my_handler(int sig, siginfo_t *si, void *context)
 {
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+}
+
+/*void my_handler(int sig, siginfo_t *si, void *context)
+{
     if (!t_pid)
         t_pid = si->si_pid;
     if (t_pid != si->si_pid)
         t_pid = -1;
 }
+*/
 
 char *attack(void)
 {
@@ -57,6 +66,7 @@ char **send_att(char *act, char **e_map, int pid)
     while (kill(pid, SIGUSR1));
     sig.sa_flags = SA_SIGINFO;
     sig.sa_sigaction = my_handler;
+    pause();
     while (sigaction(SIGUSR2, &sig, NULL))
         if (!sigaction(SIGUSR1, &sig, NULL))
             res += 1;
@@ -87,6 +97,7 @@ char **e_att(char **map, int pid)
     sig.sa_flags = SA_SIGINFO;
     sig.sa_sigaction = my_handler;
     my_putstr("waiting for enemy's attack...\n");
+    usleep(300);
     while (1) {
         if (col && !sigaction(SIGUSR1, &sig, NULL))
             break;
@@ -108,49 +119,65 @@ char **e_att(char **map, int pid)
     return (map);
 }
 
-int play(char **map, char **e_map, int pid)
+int play(char **map, char **e_map, t_glob *glob, int tour)
 {
     char *act = "ok";
-    int tour = (pid == getpid()) ? 0 : 1;
 
     print_map(map, "my positions:\n");
     print_map(e_map, "enemy's positions:\n");
     if (!tour) {
         if ((act = attack()) == NULL)
             return (0);
-        if ((e_map = send_att(act, e_map, pid)) == NULL)
+        if ((e_map = send_att(act, e_map, glob->t_pid)) == NULL)
             return (0);
         //enemy attack
-        if ((map = e_att(map, pid)) == NULL)
+        if ((map = e_att(map, glob->t_pid)) == NULL)
             return (1);
     } else {
         //enemy attack
-        if ((map = e_att(map, pid)) == NULL)
+        if ((map = e_att(map, glob->t_pid)) == NULL)
             return (1);
         if ((act = attack()) == NULL)
             return (0);
-        if ((e_map = send_att(act, e_map, pid)) == NULL)
+        if ((e_map = send_att(act, e_map, glob->t_pid)) == NULL)
             return (0);
     }
     return (3);
 }
 
-int player(char **map, int pid)
+int player(char **map, int pid, int tour, t_glob *glob)
 {
     char **e_map = create_map();
     int ret;
 
-    if (pid != getpid())
-        t_pid = pid;
+    (pid != getpid()) ? (glob->t_pid = pid) : (pid = glob->t_pid);
     if (e_map == NULL)
         return (84);
     while (1) {
-        if (t_pid == -1)
+        if (glob->t_pid == -1)
             return (84);
-        if ((ret = play(map, e_map, pid)) != 3)
+        if ((ret = play(map, e_map, glob, tour)) != 3)
             return (ret);
     }
     return (0);
+}
+
+void req_co(pid_t pid)
+{
+    kill(pid, SIGUSR2);
+    my_putstr("successfully connected\n\n");
+}
+
+void send_co(void)
+{
+    struct sigaction act;
+
+    my_putstr("waiting for enemy connection...\n\n");
+    act.sa_flags = SA_SIGINFO;
+    act.sa_sigaction = my_handler;
+    sigaction(SIGUSR2, &act, NULL);
+    pause();
+    my_putstr("enemy connected\n\n");
 }
 
 int main(int ac, char **av)
@@ -158,6 +185,8 @@ int main(int ac, char **av)
     char *str;
     char **map = create_map();
     pid_t pid;
+    int tour = (ac == 3) ? 1 : 0;
+    t_glob *glob = malloc(sizeof(t_glob));
 
     /*if (ac == 1) {
         struct sigaction act;
@@ -174,18 +203,20 @@ int main(int ac, char **av)
             usleep(1500000);
         }
         }*/
-    t_pid = 0;
     if (ac < 2 || ac > 3 || (ac == 2 && !my_strcmp(av[1], "-h")))
         if (print_help(ac, av) == -1)
             return (84);
-    if ((str = parser_file(av[1 + ((ac == 3) ? 1 : 0)])) == NULL || map == NULL)
+    if ((str = parser_file(av[1 + ((ac == 3) ? 1 : 0)])) == NULL ||
+        map == NULL || glob == NULL)
         return (84);
     if ((map = fill_map(map, str)) == NULL || (ac > 2 && my_getnbr(av[1]) < 0))
         return (84);
+    glob->t_pid = 0;
     my_putstr("my_pid: ");
     my_put_nbr(getpid());
     my_putchar('\n');
     pid = (ac == 3) ? my_getnbr(av[1]) : getpid();
-    if (player(map, pid) == -1)
+    (ac == 3) ? req_co(pid) : send_co();
+    if (player(map, pid, tour, glob) == -1)
         return (84);
 }
