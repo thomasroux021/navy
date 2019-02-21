@@ -7,7 +7,7 @@
 
 #include "my.h"
 
-void my_handler(int sig, siginfo_t *si, void *context)
+void my_handler(siginfo_t *si)
 {
     if (glob->t_pid == 0)
         glob->t_pid = si->si_pid;
