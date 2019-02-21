@@ -9,6 +9,7 @@
 #define INCLUDE_LIB
 
 #include <unistd.h>
+#include <stdarg.h>
 
 int my_index_of(char c, char *str);
 void my_putchar(char c);

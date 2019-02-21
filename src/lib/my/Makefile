@@ -39,7 +39,8 @@ SRCS	=	my_strcmp.c \
 		my_putchar.c \
 		my_strcat.c \
 		my_strlen.c	\
-		my_index_of.c
+		my_index_of.c \
+		my_printf.c
 
 OBJS    =       $(SRCS:.c=.o)
 
