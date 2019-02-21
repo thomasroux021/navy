@@ -7,7 +7,7 @@
 
 #include "my.h"
 
-void my_handler(siginfo_t *si)
+void my_handler(int sig, siginfo_t *si, void *context)
 {
     if (glob->t_pid == 0)
         glob->t_pid = si->si_pid;
@@ -57,6 +57,7 @@ int lose(char **map)
 char **send_att(char *act, char **e_map, int pid)
 {
     struct sigaction sig;
+    struct sigaction sig_two;
     int res = 0;
 
     for (int i = 0; i < act[0] - 64; i += 1)
@@ -65,8 +66,9 @@ char **send_att(char *act, char **e_map, int pid)
         while (kill(pid, SIGUSR2));
     while (kill(pid, SIGUSR1));
     sig.sa_flags = SA_SIGINFO;
-    sig.sa_sigaction = my_handler;
+    sig.sa_sigaction = &my_handler;
     pause();
+    sigaction(SIGUSR1, &sig, NULL);
     while (sigaction(SIGUSR2, &sig, NULL))
         if (!sigaction(SIGUSR1, &sig, NULL))
             res += 1;
@@ -95,7 +97,7 @@ char **e_att(char **map, int pid)
     int res;
 
     sig.sa_flags = SA_SIGINFO;
-    sig.sa_sigaction = my_handler;
+    sig.sa_sigaction = &my_handler;
     my_putstr("waiting for enemy's attack...\n");
     usleep(300);
     while (1) {
@@ -188,7 +190,7 @@ int main(int ac, char **av)
     char **map = create_map();
     pid_t pid;
     int tour = (ac == 3) ? 1 : 0;
-    t_glob *glob = malloc(sizeof(t_glob));
+    glob = malloc(sizeof(t_glob));
 
     /*if (ac == 1) {
         struct sigaction act;
