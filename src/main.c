@@ -113,13 +113,11 @@ char **send_att(char *act, char **e_map, int pid, char **map)
     while (!glob->end)
         pause();
     if (glob->res == 1 || glob->res == 3) {
-        my_putstr(act);
-        my_putstr(": hit\n\n");
+        printf("%s: hit\n\n", act);
         e_map[act[1] - 49][act[0] - 65] = 'x';
     }
     if (glob->res == 2) {
-        my_putstr(act);
-        my_putstr(": missed\n\n");
+        my_putstr("%s: missed\n\n", act);
         e_map[act[1] - 49][act[0] - 65] = 'o';
     }
     if (glob->res == 3) {
@@ -244,9 +242,7 @@ int main(int ac, char **av)
     if ((map = fill_map(map, str)) == NULL || (ac > 2 && my_getnbr(av[1]) < 0))
         return (84);
     glob->t_pid = 0;
-    my_putstr("my_pid: ");
-    my_put_nbr(getpid());
-    my_putchar('\n');
+    my_printf("my_pid: %d\n", getpid());
     pid = (ac == 3) ? my_getnbr(av[1]) : getpid();
     (ac == 3) ? req_co(pid) : send_co();
     return (player(map, pid, tour, glob));
