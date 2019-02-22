@@ -27,6 +27,7 @@ typedef struct s_glob
 {
     int t_pid;
     int res;
+    int end;
     int col;
     int line;
 } t_glob;

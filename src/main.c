@@ -15,14 +15,45 @@ void my_handler(int sig, siginfo_t *si, void *context)
         glob->t_pid = -1;
 }
 
-/*void my_handler(int sig, siginfo_t *si, void *context)
+void my_sig(int sig, siginfo_t *si, void *context)
 {
-    if (!t_pid)
-        t_pid = si->si_pid;
-    if (t_pid != si->si_pid)
-        t_pid = -1;
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    glob->res += 1;
 }
-*/
+
+void my_sig_two(int sig, siginfo_t *si, void *context)
+{
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    glob->end += 1;
+}
+
+void my_sig_act(int sig, siginfo_t *si, void *context)
+{
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    if (!glob->end)
+        glob->line += 1;
+    else if (glob->end == 1)
+        glob->col += 1;
+}
+
+void my_sig_two_act(int sig, siginfo_t *si, void *context)
+{
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    glob->end += 1;
+}
+
 
 char *attack(void)
 {
@@ -39,7 +70,7 @@ char *attack(void)
     return (act);
 }
 
-int lose(char **map)
+int lose(char **map, char **e_map)
 {
     int boat = 0;
 
@@ -50,74 +81,89 @@ int lose(char **map)
     }
     if (boat)
         return (0);
+    print_map(map, "my positions:\n");
+    print_map(e_map, "enemy's positions:\n");
     my_putstr("Enemy won\n");
     return (1);
 }
 
-char **send_att(char *act, char **e_map, int pid)
+char **send_att(char *act, char **e_map, int pid, char **map)
 {
     struct sigaction sig;
     struct sigaction sig_two;
-    int res = 0;
 
-    for (int i = 0; i < act[0] - 64; i += 1)
-        while (kill(pid, SIGUSR1));
-    for (int j = 0; j < act[0] - 48; j += 1)
-        while (kill(pid, SIGUSR2));
-    while (kill(pid, SIGUSR1));
+    for (int i = 0; i < act[0] - 64; i += 1) {
+        kill(pid, SIGUSR1);
+        usleep(100);
+    }
+    kill(pid, SIGUSR2);
+    for (int j = 0; j < act[1] - 48; j += 1) {
+        kill(pid, SIGUSR1);
+        usleep(100);
+    }
+    kill(pid, SIGUSR2);
+    glob->res = 0;
+    glob->end = 0;
     sig.sa_flags = SA_SIGINFO;
-    sig.sa_sigaction = &my_handler;
-    pause();
+    sig_two.sa_flags = SA_SIGINFO;
+    sig_two.sa_sigaction = &my_sig_two;
+    sig.sa_sigaction = &my_sig;
     sigaction(SIGUSR1, &sig, NULL);
-    while (sigaction(SIGUSR2, &sig, NULL))
-        if (!sigaction(SIGUSR1, &sig, NULL))
-            res += 1;
-    if (res == 1) {
+    sigaction(SIGUSR2, &sig_two, NULL);
+    while (!glob->end)
+        pause();
+    if (glob->res == 1 || glob->res == 3) {
         my_putstr(act);
         my_putstr(": hit\n\n");
-        e_map[act[0] - 65][act[1] - 49] = 'x';
+        e_map[act[1] - 49][act[0] - 65] = 'x';
     }
-    if (res == 2) {
+    if (glob->res == 2) {
         my_putstr(act);
         my_putstr(": missed\n\n");
-        e_map[act[0] - 65][act[1] - 49] = 'o';
+        e_map[act[1] - 49][act[0] - 65] = 'o';
     }
-    if (res == 3) {
+    if (glob->res == 3) {
+        print_map(map, "my positions:\n");
+        print_map(e_map, "enemy's positions:\n");
         my_putstr("I won\n");
         return (NULL);
     }
     return (e_map);
 }
 
-char **e_att(char **map, int pid)
+char **e_att(char **map, int pid, char **e_map)
 {
-    int line = 0;
-    int col = 0;
     struct sigaction sig;
+    struct sigaction sig_two;
     int res;
 
     sig.sa_flags = SA_SIGINFO;
-    sig.sa_sigaction = &my_handler;
+    sig.sa_sigaction = &my_sig_act;
+    sig_two.sa_flags = SA_SIGINFO;
+    sig_two.sa_sigaction = &my_sig_two_act;
+    glob->col = 0;
+    glob->line = 0;
+    glob->end = 0;
     my_putstr("waiting for enemy's attack...\n");
-    usleep(300);
-    while (1) {
-        if (col && !sigaction(SIGUSR1, &sig, NULL))
-            break;
-        if (!sigaction(SIGUSR1, &sig, NULL))
-            line += 1;
-        if (!sigaction(SIGUSR2, &sig, NULL))
-            col += 1;
-    }
-    res = (map[line - 1][col - 1] != '.') ? 1 : 2;
-    map[line - 1][col - 1] = (map[line - 1][col - 1] != '.') ? 'x' : 'o';
-    my_putchar(line + 64);
-    my_putchar(col + 48);
+    sigaction(SIGUSR1, &sig, NULL);
+    sigaction(SIGUSR2, &sig_two, NULL);
+    while (glob->end != 2)
+        pause();
+    res = (map[glob->col - 1][glob->line - 1] != '.') ? 1 : 2;
+    map[glob->col - 1][glob->line - 1] = (map[glob->col - 1][glob->line - 1] !=
+        '.') ? 'x' : 'o';
+    my_putchar(glob->line + 64);
+    my_putchar(glob->col + 48);
     (res == 1) ? my_putstr(": hit\n\n") : my_putstr(": missed\n\n");
-    if (lose(map))
+    if (lose(map, e_map))
         res = 3;
-    for (int i = 0; i < res; i += 1)
-        while (kill(pid, SIGUSR1));
-    while (kill(pid, SIGUSR2));
+    for (int i = 0; i < res; i += 1) {
+        kill(pid, SIGUSR1);
+        usleep(100);
+    }
+    kill(pid, SIGUSR2);
+    if (res == 3)
+        return (NULL);
     return (map);
 }
 
@@ -130,18 +176,16 @@ int play(char **map, char **e_map, t_glob *glob, int tour)
     if (!tour) {
         if ((act = attack()) == NULL)
             return (0);
-        if ((e_map = send_att(act, e_map, glob->t_pid)) == NULL)
+        if ((e_map = send_att(act, e_map, glob->t_pid, map)) == NULL)
             return (0);
-        //enemy attack
-        if ((map = e_att(map, glob->t_pid)) == NULL)
+        if ((map = e_att(map, glob->t_pid, e_map)) == NULL)
             return (1);
     } else {
-        //enemy attack
-        if ((map = e_att(map, glob->t_pid)) == NULL)
+        if ((map = e_att(map, glob->t_pid, e_map)) == NULL)
             return (1);
         if ((act = attack()) == NULL)
             return (0);
-        if ((e_map = send_att(act, e_map, glob->t_pid)) == NULL)
+        if ((e_map = send_att(act, e_map, glob->t_pid, map)) == NULL)
             return (0);
     }
     return (3);
@@ -161,7 +205,7 @@ int player(char **map, int pid, int tour, t_glob *glob)
         if ((ret = play(map, e_map, glob, tour)) != 3)
             return (ret);
     }
-    return (0);
+    return (84);
 }
 
 void req_co(pid_t pid)
@@ -190,23 +234,8 @@ int main(int ac, char **av)
     char **map = create_map();
     pid_t pid;
     int tour = (ac == 3) ? 1 : 0;
-    glob = malloc(sizeof(t_glob));
 
-    /*if (ac == 1) {
-        struct sigaction act;
-        act.sa_flags = SA_SIGINFO;
-        act.sa_sigaction = my_handler;
-        sigaction(SIGUSR1, &act, NULL);
-        pid_t pid = getpid();
-        kill(pid, SIGUSR1);
-        printf("pid %d\n", pid);
-        while(1);
-    } else {
-        while (kill(atoi(av[1]), SIGUSR1)) {
-            printf("wait\n");
-            usleep(1500000);
-        }
-        }*/
+    glob = malloc(sizeof(t_glob));
     if (ac < 2 || ac > 3 || (ac == 2 && !my_strcmp(av[1], "-h")))
         if (print_help(ac, av) == -1)
             return (84);
@@ -221,6 +250,5 @@ int main(int ac, char **av)
     my_putchar('\n');
     pid = (ac == 3) ? my_getnbr(av[1]) : getpid();
     (ac == 3) ? req_co(pid) : send_co();
-    if (player(map, pid, tour, glob) == -1)
-        return (84);
+    return (player(map, pid, tour, glob));
 }
