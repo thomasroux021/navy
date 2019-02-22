@@ -17,6 +17,9 @@ SRCS	=	./src/main.c \
 		./src/parser.c \
 		./src/print.c \
 		./src/get_next_line.c \
+		./src/signal.c \
+		./src/attack.c \
+		./src/play.c \
 		./src/map.c
 
 LIB_PATH=	src/lib/my/

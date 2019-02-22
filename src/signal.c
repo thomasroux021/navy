@@ -1,44 +1,55 @@
 /*
 ** EPITECH PROJECT, 2019
-** PSU_navy_2018
+** signal.c
 ** File description:
-** terminals speaking
+** signal
 */
 
-#include "../include/my.h"
+#include "my.h"
 
-void pos2_hub(char *pid_pos1, char *pos)
+void my_handler(int sig, siginfo_t *si, void *context)
 {
-    int pos1_pid = my_getnbr(pid_pos1);
-    pid_t cur_pid = getpid();
-
-    if (pos[0] == 'p' && pos[1] == 'o' && pos[2] == 's' && pos[3] == '2') {
-        my_printf("my_pid: %d\n", cur_pid);
-        if (kill(pos1_pid, SIGUSR1) == 0)
-            my_printf("successfully connected\n");
-    } else
-        my_printf("Error: incorrect syntax\n");
+    if (glob->t_pid == 0)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
 }
 
-static void sigaction_bis(void) {
-    my_printf("enemy connected\n");
+void my_sig(int sig, siginfo_t *si, void *context)
+{
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+	glob->t_pid = -1;
+    glob->res += 1;
 }
 
-void pos1_hub(char *pos)
+void my_sig_two(int sig, siginfo_t *si, void *context)
 {
-    struct sigaction act;
-    pid_t cur_pid;
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    glob->end += 1;
+}
 
-    if (pos[0] == 'p' && pos[1] == 'o' && pos[2] == 's' && pos[3] == '1') {
-        cur_pid = getpid();
-        my_printf("my_pid: %d\n", cur_pid);
-        my_printf("waiting for enemy connection...\n\n");
-        act.sa_handler = NULL;
-        sigemptyset(&act.sa_mask);
-        act.sa_sigaction = &sigaction_bis;
-        act.sa_flags = SA_SIGINFO;
-        sigaction(SIGUSR1, &act, NULL);
-        pause();
-    } else
-        my_printf("Error: incorrect syntax\n");
+void my_sig_act(int sig, siginfo_t *si, void *context)
+{
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    if (!glob->end)
+        glob->line += 1;
+    else if (glob->end == 1)
+        glob->col += 1;
+}
+
+void my_sig_two_act(int sig, siginfo_t *si, void *context)
+{
+    if (!glob->t_pid)
+        glob->t_pid = si->si_pid;
+    if (glob->t_pid != si->si_pid)
+        glob->t_pid = -1;
+    glob->end += 1;
 }

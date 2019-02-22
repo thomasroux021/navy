@@ -44,4 +44,17 @@ void print_map(char **map, char *str);
 char **fill_map(char **map, char *str);
 
 char *get_next_line(int fd);
+
+void my_sig_two_act(int sig, siginfo_t *si, void *context);
+void my_sig_act(int sig, siginfo_t *si, void *context);
+void my_sig_two(int sig, siginfo_t *si, void *context);
+void my_sig(int sig, siginfo_t *si, void *context);
+void my_handler(int sig, siginfo_t *si, void *context);
+
+char *attack(void);
+char **e_att(char **map, int pid, char **e_map);
+char **send_att(char *act, char **e_map, int pid, char **map);
+
+int lose(char **map, char **e_map);
+int player(char **map, int pid, int tour, t_glob *glob);
 #endif
