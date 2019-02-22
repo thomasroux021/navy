@@ -102,8 +102,10 @@ char *attack(void)
     char *act;
 
     my_putstr("attack: ");
-    if ((act = get_next_line(0)) == NULL)
+    if ((act = get_next_line(0)) == NULL) {
+        handle_sigint();
         return (NULL);
+    }
     if (my_strlen(act) != 2 || act[0] < 65 || act[0] > 72 ||
         act[1] < 49 || act[1] > 56) {
         my_putstr("wrong position\n");

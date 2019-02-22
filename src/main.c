@@ -7,6 +7,12 @@
 
 #include "my.h"
 
+void handle_sigint(void)
+{
+    if (glob->t_pid && glob->t_pid != -1)
+        kill(glob->t_pid, SIGINT);
+}
+
 void req_co(pid_t pid)
 {
     while (kill(pid, SIGUSR2));
