@@ -210,7 +210,7 @@ int player(char **map, int pid, int tour, t_glob *glob)
 
 void req_co(pid_t pid)
 {
-    kill(pid, SIGUSR2);
+    while (kill(pid, SIGUSR2));
     my_putstr("successfully connected\n\n");
 }
 
@@ -235,12 +235,11 @@ int main(int ac, char **av)
     pid_t pid;
     int tour = (ac == 3) ? 1 : 0;
 
-    glob = malloc(sizeof(t_glob));
     if (ac < 2 || ac > 3 || (ac == 2 && !my_strcmp(av[1], "-h")))
         if (print_help(ac, av) == -1)
             return (84);
     if ((str = parser_file(av[1 + ((ac == 3) ? 1 : 0)])) == NULL ||
-        map == NULL || glob == NULL)
+        map == NULL || (glob = malloc(sizeof(t_glob))) == NULL)
         return (84);
     if ((map = fill_map(map, str)) == NULL || (ac > 2 && my_getnbr(av[1]) < 0))
         return (84);
