@@ -48,4 +48,5 @@ char *my_strcat(char *dest, char const *src);
 char *my_strncat(char *dest, char const *src, int nb);
 int max_int(int a, int j, int memo, int n);
 int is_char(char *str, int i);
+void my_printf(char *format, ...);
 #endif
