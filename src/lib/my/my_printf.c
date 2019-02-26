@@ -10,15 +10,15 @@
 void flag_manager(char flag, va_list myprintf)
 {
     switch (flag) {
-        case 'c':
+    case 'c':
         my_putchar(va_arg(myprintf, int));
         return;
-        case 's':
+    case 's':
         my_putstr(va_arg(myprintf, char *));
         return;
-        case 'd':
+    case 'd':
         my_put_nbr(va_arg(myprintf, int));
-        default:
+    default:
         return;
     }
 }

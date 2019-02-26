@@ -63,7 +63,7 @@ char **msg_e_att(char **map, int pid, char **e_map)
         pause();
     res = (map[glob->col - 1][glob->line - 1] != '.') ? 1 : 2;
     map[glob->col - 1][glob->line - 1] = (map[glob->col - 1][glob->line - 1] !=
-        '.') ? 'x' : 'o';
+            '.') ? 'x' : 'o';
     my_putchar(glob->line + 64);
     my_putchar(glob->col + 48);
     (res == 1) ? my_putstr(": hit\n\n") : my_putstr(": missed\n\n");
