@@ -1,8 +1,8 @@
 /*
-** EPITECH PROJECT, 2018
+** EPITECH PROJECT, 2019
 ** my_strlen.c
 ** File description:
-** calculate the lenght of str
+** my_strlen
 */
 
 #include "lib.h"

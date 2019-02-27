@@ -1,6 +1,6 @@
 /*
-** EPITECH PROJECT, 2018
-** my_strcmp.c
+** EPITECH PROJECT, 2019
+** my_strcpm
 ** File description:
 ** my_strcmp
 */
