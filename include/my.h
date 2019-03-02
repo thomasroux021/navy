@@ -34,8 +34,6 @@ typedef struct s_glob
 
 t_glob *glob;
 
-void handle_sigint(void);
-
 char *parser_file(char *file);
 int len_boat(char **map);
 char **create_map(void);

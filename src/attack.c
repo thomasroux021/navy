@@ -103,10 +103,8 @@ char *attack(void)
 
     my_putstr("attack: ");
     my_putstr("\e[3m");
-    if ((act = get_next_line(0)) == NULL) {
-        handle_sigint();
+    if ((act = get_next_line(0)) == NULL)
         return (NULL);
-    }
     my_putstr("\e[0m");
     if (my_strlen(act) != 2 || act[0] < 65 || act[0] > 72 ||
         act[1] < 49 || act[1] > 56) {
