@@ -20,7 +20,7 @@ void my_sig(int sig, siginfo_t *si, void *context)
     if (!glob->t_pid)
         glob->t_pid = si->si_pid;
     if (glob->t_pid != si->si_pid)
-	glob->t_pid = -1;
+        glob->t_pid = -1;
     glob->res += 1;
 }
 
