@@ -59,8 +59,12 @@ int player(char **map, int pid, int tour, t_glob *glob)
     while (1) {
         if (glob->t_pid == -1)
             return (84);
-        if ((ret = play(map, e_map, glob, tour)) != 3)
+        if (glob->t_pid == -2)
+            return (0);
+        if ((ret = play(map, e_map, glob, tour)) != 3) {
+            (glob->t_pid == -2) ? ret = 0 : 0;
             return (ret);
+        }
     }
     return (84);
 }

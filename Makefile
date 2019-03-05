@@ -14,6 +14,7 @@ NAME	=	navy
 CFLAGS	=	-I./include -I$(LIB_PATH)
 
 SRCS	=	./src/main.c \
+		./src/sigint.c \
 		./src/parser.c \
 		./src/print.c \
 		./src/get_next_line.c \

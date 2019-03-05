@@ -18,21 +18,21 @@ char **sig_send_att(char **e_map, char *act)
     sig.sa_sigaction = &my_sig;
     sigaction(SIGUSR1, &sig, NULL);
     sigaction(SIGUSR2, &sig_two, NULL);
-    while (!glob->end)
+    while (!glob->end || glob->t_pid == -2)
         pause();
-    if (glob->res == 1 || glob->res == 3) {
-        my_printf("%s: hit\n\n", act);
-        e_map[act[1] - 49][act[0] - 65] = 'x';
-    }
-    if (glob->res == 2) {
-        my_printf("%s: missed\n\n", act);
-        e_map[act[1] - 49][act[0] - 65] = 'o';
-    }
+    if (glob->t_pid == -2)
+        return (NULL);
+    e_map = check_col(e_map, act);
     return (e_map);
 }
 
 char **send_att(char *act, char **e_map, int pid, char **map)
 {
+    struct sigaction sig;
+
+    sig.sa_flags = SA_SIGINFO;
+    sig.sa_sigaction = &my_sigint;
+    sigaction(SIGUSR2, &sig, NULL);
     for (int i = 0; i < act[0] - 64; i += 1) {
         kill(pid, SIGUSR1);
         usleep(100);
@@ -45,36 +45,29 @@ char **send_att(char *act, char **e_map, int pid, char **map)
     kill(pid, SIGUSR2);
     glob->res = 0;
     glob->end = 0;
-    e_map = sig_send_att(e_map, act);
-    if (glob->res == 3) {
-        print_map(map, "my positions:\n");
-        print_map(e_map, "enemy's positions:\n");
-        my_putstr("I won\n");
-        return (NULL);
-    }
-    return (e_map);
+    return (check_win(map, sig_send_att(e_map, act)));
 }
 
 char **msg_e_att(char **map, int pid, char **e_map)
 {
     int res;
 
-    while (glob->end != 2)
+    while (glob->end != 2 && glob->t_pid != -2)
         pause();
+    if (glob->t_pid == -2)
+        return (NULL);
     res = (map[glob->col - 1][glob->line - 1] != '.') ? 1 : 2;
     map[glob->col - 1][glob->line - 1] = (map[glob->col - 1][glob->line - 1]
         != '.') ? 'x' : 'o';
     my_putchar(glob->line + 64);
     my_putchar(glob->col + 48);
     (res == 1) ? my_putstr(": hit\n\n") : my_putstr(": missed\n\n");
-    if (lose(map, e_map))
-        res = 3;
+    (lose(map, e_map)) ? res = 3 : 0;
     for (int i = 0; i < res; i += 1) {
         kill(pid, SIGUSR1);
         usleep(100);
     }
-    kill(pid, SIGUSR2);
-    if (res == 3)
+    if (!kill(pid, SIGUSR2) && res == 3)
         return (NULL);
     return (map);
 }
@@ -92,6 +85,7 @@ char **e_att(char **map, int pid, char **e_map)
     glob->line = 0;
     glob->end = 0;
     my_putstr("waiting for enemy's attack...\n");
+    signal(SIGINT, handle_sigint);
     sigaction(SIGUSR1, &sig, NULL);
     sigaction(SIGUSR2, &sig_two, NULL);
     return (msg_e_att(map, pid, e_map));
@@ -103,8 +97,11 @@ char *attack(void)
 
     my_putstr("attack: ");
     my_putstr("\e[3m");
-    if ((act = get_next_line(0)) == NULL)
+    signal(SIGINT, handle_sigint);
+    if ((act = get_next_line(0)) == NULL) {
+        handle_sigint(0);
         return (NULL);
+    }
     my_putstr("\e[0m");
     if (my_strlen(act) != 2 || act[0] < 65 || act[0] > 72 ||
         act[1] < 49 || act[1] > 56) {

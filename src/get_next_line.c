@@ -39,8 +39,8 @@ char *get_buf(int fd)
     if (str == NULL || dest == NULL)
         return (NULL);
     dest[0] = '\0';
-    while ((size = read(fd, str, READ_SIZE)) == READ_SIZE) {
-        if (size <= 0)
+    while ((size = read(fd, str, READ_SIZE)) == 1) {
+        if (size <= 0 || glob->t_pid == -2)
             return (NULL);
         str[READ_SIZE] = '\0';
         dest = my_realloc(dest, str);
@@ -58,7 +58,7 @@ int size_line(char *buf, int i)
 {
     int j = 0;
 
-    if (buf[i] == '\0')
+    if (buf == NULL || buf[i] == '\0')
         return (-1);
     while (buf[i + j] != '\0' && buf[i + j] != '\n')
         j += 1;
