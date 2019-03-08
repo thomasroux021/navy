@@ -34,6 +34,7 @@ typedef struct s_glob
 
 t_glob *glob;
 
+int miss(char c);
 void handle_sigint(int sig);
 void my_sigint(int sig, siginfo_t *si, void *context);
 char **check_win(char **map, char **e_map);

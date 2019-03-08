@@ -9,7 +9,7 @@
 
 int hit(char c)
 {
-    if (c == '.' || c == 'x')
+    if (c == '.' || c == 'x' || c == 'o')
         return (0);
     return (1);
 }

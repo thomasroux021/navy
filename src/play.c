@@ -20,7 +20,7 @@ int lose(char **map, char **e_map)
         return (0);
     print_map(map, "my positions:\n");
     print_map(e_map, "enemy's positions:\n");
-    my_putstr("Enemy won\n");
+    my_putstr("Enemy won\n\n");
     return (1);
 }
 

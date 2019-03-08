@@ -57,8 +57,8 @@ char **msg_e_att(char **map, int pid, char **e_map)
     if (glob->t_pid == -2)
         return (NULL);
     res = (hit(map[glob->col - 1][glob->line - 1])) ? 1 : 2;
-    map[glob->col - 1][glob->line - 1] = (map[glob->col - 1][glob->line - 1]
-        != '.') ? 'x' : 'o';
+    map[glob->col - 1][glob->line - 1] =
+        (miss(map[glob->col - 1][glob->line - 1])) ? 'x' : 'o';
     my_putchar(glob->line + 64);
     my_putchar(glob->col + 48);
     (res == 1) ? my_putstr(": hit\n\n") : my_putstr(": missed\n\n");
@@ -100,6 +100,7 @@ char *attack(void)
     signal(SIGINT, handle_sigint);
     if ((act = get_next_line(0)) == NULL) {
         handle_sigint(0);
+        my_putstr("\e[0m");
         return (NULL);
     }
     my_putstr("\e[0m");
