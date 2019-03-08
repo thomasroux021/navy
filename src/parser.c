@@ -7,6 +7,13 @@
 
 #include "my.h"
 
+int hit(char c)
+{
+    if (c == '.' || c == 'x')
+        return (0);
+    return (1);
+}
+
 int char_file(char *str)
 {
     int br = 0;

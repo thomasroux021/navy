@@ -39,6 +39,7 @@ void my_sigint(int sig, siginfo_t *si, void *context);
 char **check_win(char **map, char **e_map);
 char **check_col(char **e_map, char *act);
 
+int hit(char c);
 char *parser_file(char *file);
 int len_boat(char **map);
 char **create_map(void);

@@ -56,7 +56,7 @@ char **msg_e_att(char **map, int pid, char **e_map)
         pause();
     if (glob->t_pid == -2)
         return (NULL);
-    res = (map[glob->col - 1][glob->line - 1] != '.') ? 1 : 2;
+    res = (hit(map[glob->col - 1][glob->line - 1])) ? 1 : 2;
     map[glob->col - 1][glob->line - 1] = (map[glob->col - 1][glob->line - 1]
         != '.') ? 'x' : 'o';
     my_putchar(glob->line + 64);
